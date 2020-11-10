@@ -9,6 +9,11 @@ public class findMinimumSpanningTree {
 	private class Node{
 		String identifier;
 		Edge[] edges;
+		
+		Node(String identifier){
+			this.identifier = identifier;
+			this.edges = null;
+		}
 	}
 	
 	/*
@@ -17,6 +22,12 @@ public class findMinimumSpanningTree {
 	private class Edge{
 		Node Node1, Node2;
 		int weight;
+		
+		Edge(){
+			this.Node1 = null;
+			this.Node2 = null;
+			this.weight = -1;
+		}
 	}
 	
 	
