@@ -10,10 +10,10 @@ import java.util.Vector;
 
 /*
  * Vi behöver kunna:
- * Generera en graf
- * Se till att allt är anslutet/Kolla hur allt är anslutet
+ * Generera en graf - check
+ * Se till att allt är anslutet/Kolla hur allt är anslutet - check
  * Få en adjacency matrix i någon form
- * Få en adjacency list i någon form
+ * Få en adjacency list i någon form - check
  */
 public class findMinimumSpanningTree {
 	private Node[] nodesGenerated;
@@ -23,7 +23,7 @@ public class findMinimumSpanningTree {
 	
 	/*
 	 * Tanken är att denna klass agerar som det kanter går mellan; som jag tolkat specen har noder i sig ingen vikt.
-	 * En array innehåller alla kanter som ansluter en nod till en annan, antalet är obegränsat.
+	 * En array innehåller alla kanter som ansluter en nod till en annan, antalet är begränsat.
 	 */
 	private class Node{
 		String identifier;
@@ -118,7 +118,7 @@ public class findMinimumSpanningTree {
 				}
 			}
 			Edge e = new Edge(node1, node2);
-			System.out.println("Generated edge has weight "+e.weight);
+//			System.out.println("Generated edge has weight "+e.weight);
 			
 		}while(!isConnected());
 	}
@@ -178,9 +178,50 @@ public class findMinimumSpanningTree {
 	/*
 	 * Skapar en jämn matris för alla noder i grafen
 	 */
-	int[][] generateAdjacencyMatrix() {
-		
-	}
+//    int[][] generateAdjacencyMatrix() {
+//        int[][] matrix = new int[nodesGenerated.length][nodesGenerated.length];
+//        for(int i = 0; i < nodesGenerated.length; i++) {
+//            for(int j = 0; j < nodesGenerated.length; j++) {
+//                matrix[i][j] = (isEqual(i)) ? 1 : 0;
+//            }
+//        }
+//        return matrix;
+//
+//    }
+//
+//    boolean isEqual(int node) {
+//            for (int i = 0; i < nodesGenerated[node].edges.size(); i++) {
+//                if (nodesGenerated[node] == nodesGenerated[node].edges.get(i).getOtherNode(nodesGenerated[node])){
+//                    return true;
+//                }
+//            }
+//            return false;
+//    }
+    
+    int[][] generateAdjacencyMatrix() {
+        int[][] matrix = new int[nodesGenerated.length][nodesGenerated.length];
+        String letterTest = "abcdefghijklmnopqrstuvwxyz";
+        int x = 0;
+
+        // Loop through all rows 
+        for (int i = 0; i < nodesGenerated.length; i++) {
+            // Loop through all elements of current row 
+            for (int j = 0; j < nodesGenerated[i].edges.size(); j++) {
+                x = letterTest.indexOf( nodesGenerated[i].edges.get(j).getOtherNode(nodesGenerated[i]).toString());
+                matrix[i][x] = 1;
+                    }
+            }
+
+        // test
+//        for (int i = 0; i < nodesGenerated.length; i++) {
+//            // Loop through all elements of current row 
+//            for (int j = 0; j < nodesGenerated.length; j++) {
+//                System.out.print(matrix[i][j]+" ");
+//                    }System.out.print("\n");
+//            }
+        return matrix;
+
+    }
 	
 	
 	/*
@@ -256,14 +297,36 @@ public class findMinimumSpanningTree {
 		
 		asdf.generateGraph();
 		
-		for(int i = 0; i < asdf.nodesGenerated.length; i++) {
-			System.out.println("Node "+asdf.nodesGenerated[i].toString()+" has "+asdf.nodesGenerated[i].edges.size()+" edges.");
-		}
+//		for(int i = 0; i < asdf.nodesGenerated.length; i++) {
+//			System.out.println("Node "+asdf.nodesGenerated[i].toString()+" has "+asdf.nodesGenerated[i].edges.size()+" edges.");
+//		}
 		
-		//asdf.generateAdjacencyMatrix()
+		
+		int[][] theMatrix = asdf.generateAdjacencyMatrix();
+		String[] letters = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"};
+		String alphaMatrix = "|   |";
+		
+		for(int i = 0; i < asdf.nodesGenerated.length; i++) {
+			alphaMatrix += " "+letters[i].toString()+" |";
+		}
+		alphaMatrix += "\n";
+		
+		for(int i = 0; i < theMatrix.length; i++) {
+			alphaMatrix += "| "+letters[i]+" |";
+			
+			for(int x = 0; x < theMatrix[i].length; x++) {
+				alphaMatrix += " "+theMatrix[i][x]+" |";
+			}
+			
+			alphaMatrix += "\n";
+		}
+		System.out.println(alphaMatrix);
+		
 		
 		//much debug
 		System.out.print(asdf.generateAdjacencyList());
+		
+		
 	}
 	
 	
