@@ -18,6 +18,8 @@ import java.util.Vector;
 public class findMinimumSpanningTree {
 	private Node[] nodesGenerated;
 	public Random r;
+	int timesRun;
+	int graphTraversed;
 //	private Node root;
 //	private Random r;
 	
@@ -86,14 +88,11 @@ public class findMinimumSpanningTree {
 	}
 	
 	/*
-	 * Konstruktorn bör generera en ny graf när den körs?
+	 * Genererar en graf.
 	 */
 	public void generateGraph() {
 		//Skapar en intern klass som tilldelar identifierare
 		assignIdentifier assigner = new assignIdentifier();
-		
-		//Skapar en Random för att slumpa fram antalet noder
-		Random r = new Random(System.currentTimeMillis());
 		
 		//Antalet noder som ska genereras
 		int totalNodesToMake = 4 + r.nextInt(4); //ska vara 23
@@ -136,7 +135,7 @@ public class findMinimumSpanningTree {
 	}
 	
 	public findMinimumSpanningTree() {
-		this.r = new Random(System.currentTimeMillis());
+		this.r = new Random(58646);
 	}
 	
 	
@@ -144,22 +143,28 @@ public class findMinimumSpanningTree {
 	 * Hannas isConnected.
 	 */
 	boolean isConnected() {
+		timesRun++;
         LinkedList<Node> markedNodes = new LinkedList<Node>();
         LinkedList<Node> Q = new LinkedList<Node>();
         Q.add(nodesGenerated[0]);
+        graphTraversed = 0;
         while (!Q.isEmpty()) {
+        	graphTraversed++;
             Node u = Q.pop();
             if(!isInLst(u, markedNodes)) {
                 markedNodes.add(u);
                 for (int i = 0; i < u.edges.size(); i++) {
                     Node nodeToAdd = u.edges.get(i).Node1 == u ? u.edges.get(i).Node2 : u.edges.get(i).Node1;
-                    Q.add(nodeToAdd);
+                    if(!isInLst(nodeToAdd, markedNodes)) {
+                        Q.add(nodeToAdd);
+                    }
                 }
             }
 
 
 
         }
+        System.out.println("isConnected took "+graphTraversed+" loops to traverse the graph.");
         if (markedNodes.size() == nodesGenerated.length) {
             return true;
         }
@@ -325,6 +330,9 @@ public class findMinimumSpanningTree {
 		
 		//much debug
 		System.out.print(asdf.generateAdjacencyList());
+		
+		System.out.println("isConnected ran "+asdf.timesRun);
+		
 		
 		
 	}
