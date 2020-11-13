@@ -18,10 +18,10 @@ import java.util.Vector;
 public class findMinimumSpanningTree {
 	private Node[] nodesGenerated;
 	public Random r;
+	
+	//analysvariabler; ignore
 	int timesRun;
 	int graphTraversed;
-//	private Node root;
-//	private Random r;
 	
 	/*
 	 * Tanken är att denna klass agerar som det kanter går mellan; som jag tolkat specen har noder i sig ingen vikt.
@@ -95,7 +95,7 @@ public class findMinimumSpanningTree {
 		assignIdentifier assigner = new assignIdentifier();
 		
 		//Antalet noder som ska genereras
-		int totalNodesToMake = 4 + r.nextInt(4); //ska vara 23
+		int totalNodesToMake = 6;// + r.nextInt(4); //ska vara 23
 		
 		//Tilldelar nodesGenerated en array med storlek motsvarande antalet noder som ska skapas
 		nodesGenerated = new Node[totalNodesToMake];
@@ -106,26 +106,25 @@ public class findMinimumSpanningTree {
 		}
 		
 		//Tilldelar kanter till noderna tills dess att alla noder kan nås från en nod
-		do{
+		while(!isConnected()){
 			Node node1;
 			Node node2;
 			while(true) {
 				node1 = nodesGenerated[r.nextInt(nodesGenerated.length)];
 				node2 = nodesGenerated[r.nextInt(nodesGenerated.length)];
-				if(node1.toString() != node2.toString() && edgeAlreadyPresent(node1, node2)) {
+				if(node1.toString() != node2.toString() && edgeNotAlreadyPresent(node1, node2)) {
 					break;
 				}
 			}
 			Edge e = new Edge(node1, node2);
-//			System.out.println("Generated edge has weight "+e.weight);
 			
-		}while(!isConnected());
+		}
 	}
 	
 	/*
 	 * Hjälpmetod för generateGraph().
 	 */
-	private boolean edgeAlreadyPresent(Node n1, Node n2) {
+	private boolean edgeNotAlreadyPresent(Node n1, Node n2) {
 		for(int i = 0; i < n1.edges.size(); i++) {
 			if(n1.edges.get(i).getOtherNode(n1).toString() == n2.toString()){
 				return false;
@@ -135,7 +134,10 @@ public class findMinimumSpanningTree {
 	}
 	
 	public findMinimumSpanningTree() {
-		this.r = new Random(58646);
+		/*
+		 * Seed = 2 ger en graf med 6 noder
+		 */
+		this.r = new Random(2);
 	}
 	
 	
@@ -143,13 +145,13 @@ public class findMinimumSpanningTree {
 	 * Hannas isConnected.
 	 */
 	boolean isConnected() {
-		timesRun++;
+		timesRun++; //debug/analysis
         LinkedList<Node> markedNodes = new LinkedList<Node>();
         LinkedList<Node> Q = new LinkedList<Node>();
         Q.add(nodesGenerated[0]);
-        graphTraversed = 0;
+        graphTraversed = 0; //debug/analysis
         while (!Q.isEmpty()) {
-        	graphTraversed++;
+        	graphTraversed++; //debug/analysis
             Node u = Q.pop();
             if(!isInLst(u, markedNodes)) {
                 markedNodes.add(u);
@@ -164,7 +166,7 @@ public class findMinimumSpanningTree {
 
 
         }
-        System.out.println("isConnected took "+graphTraversed+" loops to traverse the graph.");
+        //System.out.println("isConnected took "+graphTraversed+" loops to traverse the graph."); //debug/analysis
         if (markedNodes.size() == nodesGenerated.length) {
             return true;
         }
@@ -183,26 +185,6 @@ public class findMinimumSpanningTree {
 	/*
 	 * Skapar en jämn matris för alla noder i grafen
 	 */
-//    int[][] generateAdjacencyMatrix() {
-//        int[][] matrix = new int[nodesGenerated.length][nodesGenerated.length];
-//        for(int i = 0; i < nodesGenerated.length; i++) {
-//            for(int j = 0; j < nodesGenerated.length; j++) {
-//                matrix[i][j] = (isEqual(i)) ? 1 : 0;
-//            }
-//        }
-//        return matrix;
-//
-//    }
-//
-//    boolean isEqual(int node) {
-//            for (int i = 0; i < nodesGenerated[node].edges.size(); i++) {
-//                if (nodesGenerated[node] == nodesGenerated[node].edges.get(i).getOtherNode(nodesGenerated[node])){
-//                    return true;
-//                }
-//            }
-//            return false;
-//    }
-    
     int[][] generateAdjacencyMatrix() {
         int[][] matrix = new int[nodesGenerated.length][nodesGenerated.length];
         String letterTest = "abcdefghijklmnopqrstuvwxyz";
@@ -216,16 +198,7 @@ public class findMinimumSpanningTree {
                 matrix[i][x] = 1;
                     }
             }
-
-        // test
-//        for (int i = 0; i < nodesGenerated.length; i++) {
-//            // Loop through all elements of current row 
-//            for (int j = 0; j < nodesGenerated.length; j++) {
-//                System.out.print(matrix[i][j]+" ");
-//                    }System.out.print("\n");
-//            }
         return matrix;
-
     }
 	
 	
@@ -296,22 +269,13 @@ public class findMinimumSpanningTree {
 		return graph;
 	}
 	
-	//end testfunktioner ========================================================================
-	public static void main(String[] args) {
-		findMinimumSpanningTree asdf = new findMinimumSpanningTree();
-		
-		asdf.generateGraph();
-		
-//		for(int i = 0; i < asdf.nodesGenerated.length; i++) {
-//			System.out.println("Node "+asdf.nodesGenerated[i].toString()+" has "+asdf.nodesGenerated[i].edges.size()+" edges.");
-//		}
-		
-		
-		int[][] theMatrix = asdf.generateAdjacencyMatrix();
+	private void printAdjacencyMatrix() {
+
+		int[][] theMatrix = generateAdjacencyMatrix();
 		String[] letters = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"};
 		String alphaMatrix = "|   |";
 		
-		for(int i = 0; i < asdf.nodesGenerated.length; i++) {
+		for(int i = 0; i < nodesGenerated.length; i++) {
 			alphaMatrix += " "+letters[i].toString()+" |";
 		}
 		alphaMatrix += "\n";
@@ -326,12 +290,26 @@ public class findMinimumSpanningTree {
 			alphaMatrix += "\n";
 		}
 		System.out.println(alphaMatrix);
+	}
+	
+	private void printAdjacencyList(){
+		System.out.println(generateAdjacencyList());
+	}
+	//end testfunktioner ========================================================================
+	
+	public static void main(String[] args) {
+		findMinimumSpanningTree asdf = new findMinimumSpanningTree();
 		
+		asdf.generateGraph();
+		
+		asdf.printAdjacencyMatrix();
+		
+		asdf.printAdjacencyList();
 		
 		//much debug
-		System.out.print(asdf.generateAdjacencyList());
-		
-		System.out.println("isConnected ran "+asdf.timesRun);
+//		System.out.print(asdf.generateAdjacencyList());
+//		
+//		System.out.println("isConnected ran "+asdf.timesRun);
 		
 		
 		
