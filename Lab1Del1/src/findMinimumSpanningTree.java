@@ -12,7 +12,7 @@ import java.util.Vector;
  * Vi behöver kunna:
  * Generera en graf - check
  * Se till att allt är anslutet/Kolla hur allt är anslutet - check
- * Få en adjacency matrix i någon form
+ * Få en adjacency matrix i någon form - check
  * Få en adjacency list i någon form - check
  */
 public class findMinimumSpanningTree {
@@ -95,7 +95,7 @@ public class findMinimumSpanningTree {
 		assignIdentifier assigner = new assignIdentifier();
 		
 		//Antalet noder som ska genereras
-		int totalNodesToMake = 6;// + r.nextInt(4); //ska vara 23
+		int totalNodesToMake = 6;// + r.nextInt(23);
 		
 		//Tilldelar nodesGenerated en array med storlek motsvarande antalet noder som ska skapas
 		nodesGenerated = new Node[totalNodesToMake];
@@ -143,6 +143,7 @@ public class findMinimumSpanningTree {
 	
 	/*
 	 * Hannas isConnected.
+	 * Avgör om grafen är sammanhängande.
 	 */
 	boolean isConnected() {
 		timesRun++; //debug/analysis
@@ -166,7 +167,7 @@ public class findMinimumSpanningTree {
 
 
         }
-        //System.out.println("isConnected took "+graphTraversed+" loops to traverse the graph."); //debug/analysis
+        //System.out.println("isConnected took "+graphTraversed+" loops to traverse the graph."); //debug/analys
         if (markedNodes.size() == nodesGenerated.length) {
             return true;
         }
@@ -322,9 +323,9 @@ public class findMinimumSpanningTree {
 	 * (Relevant för del 2)
 	 * Hitta om en cykel finns.
 	 */
-//	boolean findCycle(){
-//		Node[] nodesVisited;
-//		
-//	}
+	boolean findCycle(){
+		Node[] nodesVisited;
+		
+	}
 	
 }
