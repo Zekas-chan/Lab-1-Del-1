@@ -65,6 +65,14 @@ public class findMinimumSpanningTree {
 			return origin.toString() == Node1.toString() ? Node2 : Node1;
 		}
 		
+		/*
+		 * Metod för att ta bort en kant.
+		 */
+		void deleteEdge() {
+			Node1.edges.remove(this);
+			Node2.edges.remove(this);
+		}
+		
 		
 	}
 	
@@ -137,7 +145,7 @@ public class findMinimumSpanningTree {
 		/*
 		 * Seed = 2 ger en graf med 6 noder
 		 */
-		this.r = new Random(2);
+		this.r = new Random(3);
 	}
 	
 	
@@ -146,13 +154,10 @@ public class findMinimumSpanningTree {
 	 * Avgör om grafen är sammanhängande.
 	 */
 	boolean isConnected() {
-		timesRun++; //debug/analysis
         LinkedList<Node> markedNodes = new LinkedList<Node>();
         LinkedList<Node> Q = new LinkedList<Node>();
         Q.add(nodesGenerated[0]);
-        graphTraversed = 0; //debug/analysis
         while (!Q.isEmpty()) {
-        	graphTraversed++; //debug/analysis
             Node u = Q.pop();
             if(!isInLst(u, markedNodes)) {
                 markedNodes.add(u);
@@ -307,6 +312,8 @@ public class findMinimumSpanningTree {
 		
 		asdf.printAdjacencyList();
 		
+		System.out.println(asdf.cyclePresent());
+		
 		//much debug
 //		System.out.print(asdf.generateAdjacencyList());
 //		
@@ -322,10 +329,37 @@ public class findMinimumSpanningTree {
 	/*
 	 * (Relevant för del 2)
 	 * Hitta om en cykel finns.
+	 * 
+	 * (work in progress)
+	 * Nuvarande problem: Samma kant gås igenom flera gånger trots extra villkor
+	 * Lösning: Spara kanter i en lista och markera om de redan finns i en?
 	 */
-	boolean findCycle(){
-		Node[] nodesVisited;
-		
+	boolean cyclePresent(){
+        LinkedList<Node> markedNodes = new LinkedList<Node>();
+        LinkedList<Edge> edgesMarked = new LinkedList<Edge>();
+        LinkedList<Node> Q = new LinkedList<Node>();
+        Q.add(nodesGenerated[0]);
+        while (!Q.isEmpty()) {
+            Node u = Q.pop();
+            Node prevNode = u;
+            System.out.println("Examining connections from node "+u.toString()); //debug
+                markedNodes.add(u);
+                for (int i = 0; i < u.edges.size(); i++) {
+                    Node nodeToAdd = u.edges.get(i).Node1 == u ? u.edges.get(i).Node2 : u.edges.get(i).Node1;
+                    System.out.println("Found adjacent node "+nodeToAdd.toString()); //debug
+                    if(!isInLst(nodeToAdd, markedNodes) && nodeToAdd != prevNode) {
+                    	System.out.println("Adding \""+nodeToAdd.toString()+"\" to nodes being examined");
+                        Q.add(nodeToAdd);
+                    }
+                }
+
+
+
+        }
+        if (markedNodes.size() == nodesGenerated.length) {
+            return true;
+        }
+        return false;
 	}
 	
 }
