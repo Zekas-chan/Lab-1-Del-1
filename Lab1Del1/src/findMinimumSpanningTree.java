@@ -103,7 +103,7 @@ public class findMinimumSpanningTree {
 		assignIdentifier assigner = new assignIdentifier();
 		
 		//Antalet noder som ska genereras
-		int totalNodesToMake = 6;// + r.nextInt(23);
+		int totalNodesToMake = 5;// + r.nextInt(23);
 		
 		//Tilldelar nodesGenerated en array med storlek motsvarande antalet noder som ska skapas
 		nodesGenerated = new Node[totalNodesToMake];
@@ -145,7 +145,7 @@ public class findMinimumSpanningTree {
 		/*
 		 * Seed = 2 ger en graf med 6 noder
 		 */
-		this.r = new Random(3);
+		this.r = new Random(2);
 	}
 	
 	
@@ -312,7 +312,11 @@ public class findMinimumSpanningTree {
 		
 		asdf.printAdjacencyList();
 		
-		System.out.println(asdf.cyclePresent());
+		System.out.println("Node "+asdf.nodesGenerated[2].toString()+" has an edge between "+asdf.nodesGenerated[2].edges.get(0).Node1.toString()+" and "+asdf.nodesGenerated[2].edges.get(0).Node2.toString());
+		System.out.println("Cycle is present: "+asdf.cyclePresent());
+		System.out.println("Removing this edge...");
+		asdf.nodesGenerated[2].edges.get(0).deleteEdge();
+		System.out.println("Cycle still present?: "+asdf.cyclePresent());
 		
 		//much debug
 //		System.out.print(asdf.generateAdjacencyList());
@@ -334,32 +338,62 @@ public class findMinimumSpanningTree {
 	 * Nuvarande problem: Samma kant gås igenom flera gånger trots extra villkor
 	 * Lösning: Spara kanter i en lista och markera om de redan finns i en?
 	 */
-	boolean cyclePresent(){
-        LinkedList<Node> markedNodes = new LinkedList<Node>();
-        LinkedList<Edge> edgesMarked = new LinkedList<Edge>();
-        LinkedList<Node> Q = new LinkedList<Node>();
-        Q.add(nodesGenerated[0]);
-        while (!Q.isEmpty()) {
-            Node u = Q.pop();
-            Node prevNode = u;
-            System.out.println("Examining connections from node "+u.toString()); //debug
-                markedNodes.add(u);
-                for (int i = 0; i < u.edges.size(); i++) {
-                    Node nodeToAdd = u.edges.get(i).Node1 == u ? u.edges.get(i).Node2 : u.edges.get(i).Node1;
-                    System.out.println("Found adjacent node "+nodeToAdd.toString()); //debug
-                    if(!isInLst(nodeToAdd, markedNodes) && nodeToAdd != prevNode) {
-                    	System.out.println("Adding \""+nodeToAdd.toString()+"\" to nodes being examined");
-                        Q.add(nodeToAdd);
-                    }
-                }
-
-
-
-        }
-        if (markedNodes.size() == nodesGenerated.length) {
-            return true;
-        }
-        return false;
+//	boolean cyclePresent(){
+//        LinkedList<Node> markedNodes = new LinkedList<Node>();
+//        LinkedList<Edge> edgesMarked = new LinkedList<Edge>();
+//        LinkedList<Node> Q = new LinkedList<Node>();
+//        Q.add(nodesGenerated[0]);
+//        while (!Q.isEmpty()) {
+//            Node u = Q.pop();
+//            System.out.println("Examining connections from node "+u.toString()); //debug
+//            markedNodes.add(u);
+//            
+//            for (int i = 0; i < u.edges.size(); i++) {
+//                Node nodeToAdd = u.edges.get(i).Node1 == u ? u.edges.get(i).Node2 : u.edges.get(i).Node1;
+//                Edge edgeToMark = u.edges.get(i).Node1 == u ? u.edges.get(i) : u.edges.get(i);
+//                System.out.println("Found adjacent node "+nodeToAdd.toString()); //debug
+//                if(!markedNodes.contains(nodeToAdd) && !edgesMarked.contains(edgeToMark)) {
+//                	System.out.println("Adding \""+nodeToAdd.toString()+"\" to nodes being examined");
+//                    Q.add(nodeToAdd);
+//                    edgesMarked.add(edgeToMark);
+//                }
+//                
+//                }
+//
+//        }
+//        if (markedNodes.size() == nodesGenerated.length) {
+//            return true;
+//        }
+//        return false;
+//	}
+	
+	boolean cyclePresent() {
+		LinkedList<Node> foundNodes = new LinkedList<Node>();
+		LinkedList<Edge> edgesMarked = new LinkedList<Edge>();
+		LinkedList<Node> Queue = new LinkedList<Node>();
+		
+		Queue.add(nodesGenerated[0]);
+		while(!Queue.isEmpty()) {
+			Node n = Queue.pop();
+//			System.out.println("Examining connections from node "+n.toString()); //debug
+			if(foundNodes.contains(n)) {
+				return true;
+			} else {
+				foundNodes.add(n);
+			}
+			for(int i = 0; i < n.edges.size(); i++) {
+				Edge e = n.edges.get(i);
+				if(edgesMarked.contains(e)) {
+					continue;
+				}
+				edgesMarked.add(e);
+				Node next = n.edges.get(i).getOtherNode(n);
+//				System.out.println("Found adjacent node "+next.toString()); //debug
+				Queue.add(next);
+			}
+			
+		}
+		return false;
 	}
 	
 }
