@@ -51,6 +51,10 @@ public class findMinimumSpanningTree {
 		/*
 		 * Konstruktor
 		 */
+		Edge(){
+			this.weight = Integer.MAX_VALUE;
+		}
+		
 		Edge(Node node1, Node node2){
 			if(node1.edges.capacity() > node1.edges.size() && node2.edges.capacity() > node2.edges.size()) {
 				this.Node1 = node1;
@@ -60,6 +64,8 @@ public class findMinimumSpanningTree {
 				this.weight = 1 + r.nextInt(10);
 			}
 		}
+		
+		
 		
 		Node getOtherNode(Node origin) {
 			return origin.toString() == Node1.toString() ? Node2 : Node1;
@@ -103,7 +109,7 @@ public class findMinimumSpanningTree {
 		assignIdentifier assigner = new assignIdentifier();
 		
 		//Antalet noder som ska genereras
-		int totalNodesToMake = 5;// + r.nextInt(23);
+		int totalNodesToMake = 10;// + r.nextInt(23);
 		
 		//Tilldelar nodesGenerated en array med storlek motsvarande antalet noder som ska skapas
 		nodesGenerated = new Node[totalNodesToMake];
@@ -312,11 +318,19 @@ public class findMinimumSpanningTree {
 		
 		asdf.printAdjacencyList();
 		
-		System.out.println("Node "+asdf.nodesGenerated[2].toString()+" has an edge between "+asdf.nodesGenerated[2].edges.get(0).Node1.toString()+" and "+asdf.nodesGenerated[2].edges.get(0).Node2.toString());
-		System.out.println("Cycle is present: "+asdf.cyclePresent());
-		System.out.println("Removing this edge...");
-		asdf.nodesGenerated[2].edges.get(0).deleteEdge();
-		System.out.println("Cycle still present?: "+asdf.cyclePresent());
+		System.out.println("Running prim on it!");
+		
+		
+		asdf.unsortedAdjacencyList(asdf.primAlg());
+		
+		
+		
+//		System.out.println("Node "+asdf.nodesGenerated[2].toString()+" has an edge between "+asdf.nodesGenerated[2].edges.get(0).Node1.toString()+" and "+asdf.nodesGenerated[2].edges.get(0).Node2.toString());
+//		System.out.println("Cycle is present: "+asdf.cyclePresent());
+//		System.out.println("Removing this edge...");
+//		asdf.nodesGenerated[2].edges.get(0).deleteEdge();
+//		System.out.println("Cycle still present?: "+asdf.cyclePresent());
+//		System.out.println("Is still connected?: "+asdf.isConnected());
 		
 		//much debug
 //		System.out.print(asdf.generateAdjacencyList());
@@ -338,35 +352,6 @@ public class findMinimumSpanningTree {
 	 * Nuvarande problem: Samma kant gås igenom flera gånger trots extra villkor
 	 * Lösning: Spara kanter i en lista och markera om de redan finns i en?
 	 */
-//	boolean cyclePresent(){
-//        LinkedList<Node> markedNodes = new LinkedList<Node>();
-//        LinkedList<Edge> edgesMarked = new LinkedList<Edge>();
-//        LinkedList<Node> Q = new LinkedList<Node>();
-//        Q.add(nodesGenerated[0]);
-//        while (!Q.isEmpty()) {
-//            Node u = Q.pop();
-//            System.out.println("Examining connections from node "+u.toString()); //debug
-//            markedNodes.add(u);
-//            
-//            for (int i = 0; i < u.edges.size(); i++) {
-//                Node nodeToAdd = u.edges.get(i).Node1 == u ? u.edges.get(i).Node2 : u.edges.get(i).Node1;
-//                Edge edgeToMark = u.edges.get(i).Node1 == u ? u.edges.get(i) : u.edges.get(i);
-//                System.out.println("Found adjacent node "+nodeToAdd.toString()); //debug
-//                if(!markedNodes.contains(nodeToAdd) && !edgesMarked.contains(edgeToMark)) {
-//                	System.out.println("Adding \""+nodeToAdd.toString()+"\" to nodes being examined");
-//                    Q.add(nodeToAdd);
-//                    edgesMarked.add(edgeToMark);
-//                }
-//                
-//                }
-//
-//        }
-//        if (markedNodes.size() == nodesGenerated.length) {
-//            return true;
-//        }
-//        return false;
-//	}
-	
 	boolean cyclePresent() {
 		LinkedList<Node> foundNodes = new LinkedList<Node>();
 		LinkedList<Edge> edgesMarked = new LinkedList<Edge>();
@@ -395,5 +380,91 @@ public class findMinimumSpanningTree {
 		}
 		return false;
 	}
+	
+	
+	/*
+	 * 
+	 */
+	LinkedList<Edge> primAlg() {
+		//data
+		LinkedList<Node> chosenNodes = new LinkedList<Node>();
+		LinkedList<Edge> chosenEdges = new LinkedList<Edge>();
+		
+		//vars
+		Node cur = nodesGenerated[r.nextInt(nodesGenerated.length)]; //startnod
+		Edge minEdge = new Edge();
+//		int i = -1;
+		
+		//init
+		chosenNodes.add(cur);
+		System.out.println("Starting node is: "+cur.toString());
+		
+		while(chosenNodes.size() < nodesGenerated.length) {
+			for(int i = 0; i < chosenNodes.size(); i++) {
+			cur = chosenNodes.get(i);
+			minEdge = new Edge();
+			System.out.println("Examining node "+cur.toString());
+			
+			for(int x = 0; x < cur.edges.size(); x++) {
+				System.out.println("Found edge with weight "+cur.edges.get(x).weight+" between nodes "+cur.toString()+" and "+cur.edges.get(x).getOtherNode(cur).toString());
+				if(cur.edges.get(x).weight < minEdge.weight && !chosenNodes.contains(cur.edges.get(x).getOtherNode(cur))) {
+					minEdge = cur.edges.get(x);
+					System.out.println("Found new minimum edge with weight: "+minEdge.weight);
+					
+				}//if
+				
+			}//for
+			
+			System.out.println("Before adding edges and nodes");
+			if(minEdge.Node1 != null) {
+				chosenEdges.add(minEdge);
+				chosenNodes.add(minEdge.getOtherNode(cur));
+			}
+//			System.out.println("Added edge with weight "+minEdge.weight+" that connects "+cur.toString()+" and "+minEdge.getOtherNode(cur).toString());
+			}
+		}//while
+
+		
+		
+		return chosenEdges;
+	}
+	
+	void unsortedAdjacencyList(LinkedList<Edge> eList) {
+		Node[] copyOfOriginal = nodesGenerated.clone();
+		
+		for(int i = 0; i < copyOfOriginal.length; i++) {
+			for(int x = 0; x < copyOfOriginal[i].edges.size(); x++) {
+				if(!eList.contains(copyOfOriginal[i].edges.get(x))) {
+					copyOfOriginal[i].edges.get(x).deleteEdge();
+				}
+			}
+		}//for
+		
+		String Lst = "\nGraph adjacency list:\n";
+		for(int i = 0; i < copyOfOriginal.length; i++) {
+			Lst += copyOfOriginal[i].toString()+":";
+			for(int x = 0; x < copyOfOriginal[i].edges.size(); x++) {
+				Lst = Lst + copyOfOriginal[i].edges.get(x).getOtherNode(copyOfOriginal[i]).toString();
+			}
+			Lst += "\n";
+		}
+		System.out.println(Lst);
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 }
