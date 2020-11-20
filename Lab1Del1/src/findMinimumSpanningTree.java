@@ -1,3 +1,4 @@
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.PriorityQueue;
 import java.util.Random;
@@ -18,6 +19,7 @@ import java.util.Vector;
  */
 public class findMinimumSpanningTree {
 	private Node[] nodesGenerated;
+	public static int edgesCreated;
 	public Random r;
 	
 	//analysvariabler; ignore
@@ -58,11 +60,12 @@ public class findMinimumSpanningTree {
 		
 		Edge(Node node1, Node node2){
 			if(node1.edges.capacity() > node1.edges.size() && node2.edges.capacity() > node2.edges.size()) {
+				edgesCreated++;
 				this.Node1 = node1;
 				this.Node2 = node2;
 				node1.edges.add(this);
 				node2.edges.add(this);
-				this.weight = 1 + r.nextInt(10);
+				this.weight = 1 + r.nextInt(20);
 			}
 		}
 		
@@ -80,6 +83,21 @@ public class findMinimumSpanningTree {
 			Node2.edges.remove(this);
 		}
 		
+		
+	}
+	
+	public class Compare implements Comparator<Edge>{
+
+		@Override
+		public int compare(Edge o1, Edge o2) {
+			if(o1.weight < o2.weight) {
+				return -1;
+			}else if(o1.weight == o2.weight) {
+				return 0;
+			}else {
+				return 1;
+			}
+		}
 		
 	}
 	
@@ -316,6 +334,8 @@ public class findMinimumSpanningTree {
 		
 		asdf.printAdjacencyList();
 		
+		System.out.println("Has cycle?: "+asdf.cyclePresent(asdf.nodesGenerated[0]));
+		System.out.println("Is connected?: "+asdf.isConnected());
 		
 		System.out.println("Running prim on it!");
 		
@@ -329,7 +349,14 @@ public class findMinimumSpanningTree {
 //		System.out.println(asdf.cyclePresent(asdf.nodesGenerated[0]));
 		
 		
-		asdf.heapedPrimAlg(asdf.unsortedPrimAlg());
+		asdf.createNewTree(asdf.heapedPrimAlg());
+		
+		asdf.printAdjacencyMatrix();
+		
+		asdf.printAdjacencyList();
+		
+		System.out.println("Has cycle?: "+asdf.cyclePresent(asdf.nodesGenerated[0]));
+		System.out.println("Is connected?: "+asdf.isConnected());
 		
 		
 		
@@ -409,18 +436,61 @@ public class findMinimumSpanningTree {
 	/*
 	 * This is broke
 	 */
-	Node[] heapedPrimAlg(LinkedList<Edge> eList) {
-		Node[] test = {};
-		PriorityQueue<Edge> pList = new PriorityQueue<Edge>();
+	LinkedList<Edge> heapedPrimAlg() {
+//		LinkedList<Edge> allEdges = new LinkedList<Edge>();
+		PriorityQueue<Edge> allEdges = new PriorityQueue<Edge>(new Compare());
+		LinkedList<Node> markedNodes = new LinkedList<Node>();
+		LinkedList<Edge> markedEdges = new LinkedList<Edge>();
 		
-		for(int i = 0; i < eList.size(); i++) {
-			pList.add(eList.get(i));
+		
+		for(int i = 0; i < nodesGenerated.length; i++) {
+			for(int j = 0; j < nodesGenerated[i].edges.size(); j++) {
+				if(!allEdges.contains(nodesGenerated[i].edges.get(j))) {
+					allEdges.add(nodesGenerated[i].edges.get(j));
+				}
+			}
 		}
 		
-		System.out.println("First element connects node "+pList.peek().Node1.toString()+" and "+pList.peek().Node2.toString()+".");
+		//glorious debug
+//		System.out.println("Total edges: "+edgesCreated);
+//		System.out.println("But are they equal?: "+allEdges.size());
+//		int i = 0;
+//		while(!allEdges.isEmpty()) {
+//			System.out.println(i+" position in queue has weight "+allEdges.peek().weight);
+//			allEdges.poll();
+//			i++;
+//		}
+		
+		/*
+		 * Teori:
+		 * 
+		 * Ta en kant, markera en av dess noder
+		 * Ta sedan nästa lägsta kant, om EN? av noderna är markerade, markera den andra noden och kanten
+		 * Om ingen av noderna är markerade, spara kanten men 
+		 */
+		
+//		Edge e = allEdges.peek();
+//		System.out.println("Node "+allEdges.peek().Node1.toString()+" and "+allEdges.peek().Node2.toString());
+//		markedNodes.add(e.Node1);
+//		while(!allEdges.isEmpty()) {
+//			e = allEdges.poll();
+//			if(markedNodes.contains(e.Node1) || markedNodes.contains(e.Node2)) {
+//			}
+//			
+//		}
 		
 		
-		return test;
+		Edge e = allEdges.peek();
+		markedNodes.add(e.Node1);
+		
+		while(markedNodes.size() < nodesGenerated.length) {
+		}
+		
+		return markedEdges;
+		
+
+		
+//		System.out.println("First element connects node "+pList.peek().Node1.toString()+" and "+pList.peek().Node2.toString()+".");
 	}
 	
 	
@@ -429,7 +499,7 @@ public class findMinimumSpanningTree {
 	 */
 	Node[] createNewTree(LinkedList<Edge> eList) {
 		Node[] copyOfOriginal = nodesGenerated.clone();
-		Edge[] killList = new Edge[50];
+		Edge[] killList = new Edge[100];
 		
 		int asdf = -1;
 		for(Node n : copyOfOriginal) {
