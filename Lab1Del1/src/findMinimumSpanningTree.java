@@ -1,4 +1,5 @@
 import java.util.LinkedList;
+import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.Vector;
 
@@ -109,7 +110,7 @@ public class findMinimumSpanningTree {
 		assignIdentifier assigner = new assignIdentifier();
 		
 		//Antalet noder som ska genereras
-		int totalNodesToMake = 10;// + r.nextInt(23);
+		int totalNodesToMake = 23;// + r.nextInt(23);
 		
 		//Tilldelar nodesGenerated en array med storlek motsvarande antalet noder som ska skapas
 		nodesGenerated = new Node[totalNodesToMake];
@@ -148,9 +149,6 @@ public class findMinimumSpanningTree {
 	}
 	
 	public findMinimumSpanningTree() {
-		/*
-		 * Seed = 2 ger en graf med 6 noder
-		 */
 		this.r = new Random(2);
 	}
 	
@@ -318,24 +316,20 @@ public class findMinimumSpanningTree {
 		
 		asdf.printAdjacencyList();
 		
+		
 		System.out.println("Running prim on it!");
 		
-		
-		asdf.unsortedAdjacencyList(asdf.primAlg());
-		
-		
-		
-//		System.out.println("Node "+asdf.nodesGenerated[2].toString()+" has an edge between "+asdf.nodesGenerated[2].edges.get(0).Node1.toString()+" and "+asdf.nodesGenerated[2].edges.get(0).Node2.toString());
-//		System.out.println("Cycle is present: "+asdf.cyclePresent());
-//		System.out.println("Removing this edge...");
-//		asdf.nodesGenerated[2].edges.get(0).deleteEdge();
-//		System.out.println("Cycle still present?: "+asdf.cyclePresent());
-//		System.out.println("Is still connected?: "+asdf.isConnected());
-		
-		//much debug
-//		System.out.print(asdf.generateAdjacencyList());
+		//do not remove commented lines below
+//		asdf.nodesGenerated = asdf.createNewTree(asdf.unsortedPrimAlg());
 //		
-//		System.out.println("isConnected ran "+asdf.timesRun);
+//		asdf.printAdjacencyMatrix();
+//		
+//		asdf.printAdjacencyList();
+//		
+//		System.out.println(asdf.cyclePresent(asdf.nodesGenerated[0]));
+		
+		
+		asdf.heapedPrimAlg(asdf.unsortedPrimAlg());
 		
 		
 		
@@ -343,24 +337,19 @@ public class findMinimumSpanningTree {
 	
 	
 	
-//==========================================================================================
+//=================================|Del 2|=========================================================
 	/*
-	 * (Relevant för del 2)
+	 * (*inte* Relevant för del 2)
 	 * Hitta om en cykel finns.
-	 * 
-	 * (work in progress)
-	 * Nuvarande problem: Samma kant gås igenom flera gånger trots extra villkor
-	 * Lösning: Spara kanter i en lista och markera om de redan finns i en?
 	 */
-	boolean cyclePresent() {
+	boolean cyclePresent(Node start) {
 		LinkedList<Node> foundNodes = new LinkedList<Node>();
 		LinkedList<Edge> edgesMarked = new LinkedList<Edge>();
 		LinkedList<Node> Queue = new LinkedList<Node>();
 		
-		Queue.add(nodesGenerated[0]);
+		Queue.add(start);
 		while(!Queue.isEmpty()) {
 			Node n = Queue.pop();
-//			System.out.println("Examining connections from node "+n.toString()); //debug
 			if(foundNodes.contains(n)) {
 				return true;
 			} else {
@@ -373,7 +362,6 @@ public class findMinimumSpanningTree {
 				}
 				edgesMarked.add(e);
 				Node next = n.edges.get(i).getOtherNode(n);
-//				System.out.println("Found adjacent node "+next.toString()); //debug
 				Queue.add(next);
 			}
 			
@@ -385,7 +373,7 @@ public class findMinimumSpanningTree {
 	/*
 	 * 
 	 */
-	LinkedList<Edge> primAlg() {
+	LinkedList<Edge> unsortedPrimAlg() {
 		//data
 		LinkedList<Node> chosenNodes = new LinkedList<Node>();
 		LinkedList<Edge> chosenEdges = new LinkedList<Edge>();
@@ -393,62 +381,74 @@ public class findMinimumSpanningTree {
 		//vars
 		Node cur = nodesGenerated[r.nextInt(nodesGenerated.length)]; //startnod
 		Edge minEdge = new Edge();
-//		int i = -1;
 		
 		//init
 		chosenNodes.add(cur);
-		System.out.println("Starting node is: "+cur.toString());
 		
 		while(chosenNodes.size() < nodesGenerated.length) {
 			for(int i = 0; i < chosenNodes.size(); i++) {
-			cur = chosenNodes.get(i);
-			minEdge = new Edge();
-			System.out.println("Examining node "+cur.toString());
-			
-			for(int x = 0; x < cur.edges.size(); x++) {
-				System.out.println("Found edge with weight "+cur.edges.get(x).weight+" between nodes "+cur.toString()+" and "+cur.edges.get(x).getOtherNode(cur).toString());
-				if(cur.edges.get(x).weight < minEdge.weight && !chosenNodes.contains(cur.edges.get(x).getOtherNode(cur))) {
-					minEdge = cur.edges.get(x);
-					System.out.println("Found new minimum edge with weight: "+minEdge.weight);
-					
-				}//if
+				cur = chosenNodes.get(i);
+				minEdge = new Edge();
 				
-			}//for
+				for(int x = 0; x < cur.edges.size(); x++) {
+					if(cur.edges.get(x).weight < minEdge.weight && !chosenNodes.contains(cur.edges.get(x).getOtherNode(cur))) {
+						minEdge = cur.edges.get(x);
+					}//if
+				}//for
+				
+				if(minEdge.Node1 != null) {
+					chosenEdges.add(minEdge);
+					chosenNodes.add(minEdge.getOtherNode(cur));
+				}
 			
-			System.out.println("Before adding edges and nodes");
-			if(minEdge.Node1 != null) {
-				chosenEdges.add(minEdge);
-				chosenNodes.add(minEdge.getOtherNode(cur));
-			}
-//			System.out.println("Added edge with weight "+minEdge.weight+" that connects "+cur.toString()+" and "+minEdge.getOtherNode(cur).toString());
 			}
 		}//while
-
-		
-		
 		return chosenEdges;
 	}
 	
-	void unsortedAdjacencyList(LinkedList<Edge> eList) {
-		Node[] copyOfOriginal = nodesGenerated.clone();
+	/*
+	 * This is broke
+	 */
+	Node[] heapedPrimAlg(LinkedList<Edge> eList) {
+		Node[] test = {};
+		PriorityQueue<Edge> pList = new PriorityQueue<Edge>();
 		
-		for(int i = 0; i < copyOfOriginal.length; i++) {
-			for(int x = 0; x < copyOfOriginal[i].edges.size(); x++) {
-				if(!eList.contains(copyOfOriginal[i].edges.get(x))) {
-					copyOfOriginal[i].edges.get(x).deleteEdge();
+		for(int i = 0; i < eList.size(); i++) {
+			pList.add(eList.get(i));
+		}
+		
+		System.out.println("First element connects node "+pList.peek().Node1.toString()+" and "+pList.peek().Node2.toString()+".");
+		
+		
+		return test;
+	}
+	
+	
+	/*
+	 * Skapar ett träd genom att ta bort alla kanter som Prims algoritm inte valde.
+	 */
+	Node[] createNewTree(LinkedList<Edge> eList) {
+		Node[] copyOfOriginal = nodesGenerated.clone();
+		Edge[] killList = new Edge[50];
+		
+		int asdf = -1;
+		for(Node n : copyOfOriginal) {
+			for(Edge e : n.edges) {
+				if(!eList.contains(e)) {
+					asdf++;
+					killList[asdf] = e;
 				}
 			}
-		}//for
-		
-		String Lst = "\nGraph adjacency list:\n";
-		for(int i = 0; i < copyOfOriginal.length; i++) {
-			Lst += copyOfOriginal[i].toString()+":";
-			for(int x = 0; x < copyOfOriginal[i].edges.size(); x++) {
-				Lst = Lst + copyOfOriginal[i].edges.get(x).getOtherNode(copyOfOriginal[i]).toString();
-			}
-			Lst += "\n";
 		}
-		System.out.println(Lst);
+		
+		for(Edge target : killList) {
+			if(target == null) {
+				break;
+			}
+			target.deleteEdge();
+		}
+		
+		return copyOfOriginal;
 	}
 	
 	
