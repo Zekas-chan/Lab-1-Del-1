@@ -26,6 +26,14 @@ public class findMinimumSpanningTree {
 	int timesRun;
 	int graphTraversed;
 	
+	//analysis: different prims
+	int heapedPrimAlgActions;
+	int unsortedPrimAlgActions;
+	
+	//analysis: adjacency matrix and list
+	int matrixActions;
+	int listActions;
+	
 	/*
 	 * Tanken är att denna klass agerar som det kanter går mellan; som jag tolkat specen har noder i sig ingen vikt.
 	 * En array innehåller alla kanter som ansluter en nod till en annan, antalet är begränsat.
@@ -128,7 +136,7 @@ public class findMinimumSpanningTree {
 		assignIdentifier assigner = new assignIdentifier();
 		
 		//Antalet noder som ska genereras
-		int totalNodesToMake = 23;// + r.nextInt(23);
+		int totalNodesToMake = 25; //r.nextInt(23);
 		
 		//Tilldelar nodesGenerated en array med storlek motsvarande antalet noder som ska skapas
 		nodesGenerated = new Node[totalNodesToMake];
@@ -168,6 +176,7 @@ public class findMinimumSpanningTree {
 	
 	public findMinimumSpanningTree() {
 		this.r = new Random(2);
+//		this.r = new Random(System.currentTimeMillis());
 	}
 	
 	
@@ -214,16 +223,20 @@ public class findMinimumSpanningTree {
 	 * Skapar en jämn matris för alla noder i grafen
 	 */
     int[][] generateAdjacencyMatrix() {
-        int[][] matrix = new int[nodesGenerated.length][nodesGenerated.length];
         String letterTest = "abcdefghijklmnopqrstuvwxyz";
         int x = 0;
+        
+        int[][] matrix = new int[nodesGenerated.length][nodesGenerated.length];
+        matrixActions++;
 
         // Loop through all rows 
         for (int i = 0; i < nodesGenerated.length; i++) {
             // Loop through all elements of current row 
             for (int j = 0; j < nodesGenerated[i].edges.size(); j++) {
                 x = letterTest.indexOf( nodesGenerated[i].edges.get(j).getOtherNode(nodesGenerated[i]).toString());
+                matrixActions++;
                 matrix[i][x] = 1;
+                matrixActions++;
                     }
             }
         return matrix;
@@ -235,12 +248,16 @@ public class findMinimumSpanningTree {
 	 */
 	String generateAdjacencyList(){
 		String Lst = "\nGraph adjacency list:\n";
+		listActions++;
 		for(int i = 0; i < nodesGenerated.length; i++) {
 			Lst += nodesGenerated[i].toString()+":";
+			listActions++;
 			for(int x = 0; x < nodesGenerated[i].edges.size(); x++) {
 				Lst = Lst + nodesGenerated[i].edges.get(x).getOtherNode(nodesGenerated[i]).toString();
+				listActions++;
 			}
 			Lst += "\n";
+			listActions++;
 		}
 		return Lst;
 	}
@@ -336,27 +353,42 @@ public class findMinimumSpanningTree {
 		
 		System.out.println("Has cycle?: "+asdf.cyclePresent(asdf.nodesGenerated[0]));
 		System.out.println("Is connected?: "+asdf.isConnected());
+		System.out.println("The matrix took "+asdf.matrixActions+" actions to generate.");
+		System.out.println("The list took "+asdf.listActions+" actions to generate.");
+		
+		asdf.matrixActions = 0;
+		asdf.listActions = 0;
 		
 		System.out.println("Running prim on it!");
 		
 		//do not remove commented lines below
-//		asdf.nodesGenerated = asdf.createNewTree(asdf.unsortedPrimAlg());
-//		
-//		asdf.printAdjacencyMatrix();
-//		
-//		asdf.printAdjacencyList();
-//		
-//		System.out.println(asdf.cyclePresent(asdf.nodesGenerated[0]));
+		Node[] copy1 = asdf.nodesGenerated.clone();
+		Node[] copy2 = asdf.nodesGenerated.clone();
 		
-		
-		asdf.createNewTree(asdf.heapedPrimAlg());
+//		=======UNSORTED VERSION=======
+		asdf.nodesGenerated = asdf.createNewTree(asdf.unsortedPrimAlg(copy1));
 		
 		asdf.printAdjacencyMatrix();
 		
 		asdf.printAdjacencyList();
 		
 		System.out.println("Has cycle?: "+asdf.cyclePresent(asdf.nodesGenerated[0]));
-		System.out.println("Is connected?: "+asdf.isConnected());
+		System.out.println("Unsorted version used "+asdf.unsortedPrimAlgActions+" actions.");
+		System.out.println("The matrix took "+asdf.matrixActions+" actions to generate.");
+		System.out.println("The list took "+asdf.listActions+" actions to generate.");
+		
+		//====== HEAPED VERSION ==========
+//		asdf.createNewTree(asdf.heapedPrimAlg(copy2));
+//		
+//		asdf.printAdjacencyMatrix();
+//		
+//		asdf.printAdjacencyList();
+//		
+//		System.out.println("Has cycle?: "+asdf.cyclePresent(asdf.nodesGenerated[0]));
+//		System.out.println("Is connected?: "+asdf.isConnected());
+//		System.out.println("Heaped version used "+asdf.heapedPrimAlgActions+" actions.");
+//		System.out.println("The matrix took "+asdf.matrixActions+" actions to generate.");
+//		System.out.println("The list took "+asdf.listActions+" actions to generate.");
 		
 		
 		
@@ -400,32 +432,38 @@ public class findMinimumSpanningTree {
 	/*
 	 * 
 	 */
-	LinkedList<Edge> unsortedPrimAlg() {
+	LinkedList<Edge> unsortedPrimAlg(Node[] graph) {
 		//data
 		LinkedList<Node> chosenNodes = new LinkedList<Node>();
 		LinkedList<Edge> chosenEdges = new LinkedList<Edge>();
 		
 		//vars
-		Node cur = nodesGenerated[r.nextInt(nodesGenerated.length)]; //startnod
+		Node cur = graph[r.nextInt(graph.length)]; //startnod
 		Edge minEdge = new Edge();
 		
 		//init
 		chosenNodes.add(cur);
+		unsortedPrimAlgActions++;
 		
-		while(chosenNodes.size() < nodesGenerated.length) {
+		while(chosenNodes.size() < graph.length) {
 			for(int i = 0; i < chosenNodes.size(); i++) {
 				cur = chosenNodes.get(i);
+				unsortedPrimAlgActions++;
 				minEdge = new Edge();
+				unsortedPrimAlgActions++;
 				
 				for(int x = 0; x < cur.edges.size(); x++) {
 					if(cur.edges.get(x).weight < minEdge.weight && !chosenNodes.contains(cur.edges.get(x).getOtherNode(cur))) {
 						minEdge = cur.edges.get(x);
+						unsortedPrimAlgActions++;
 					}//if
 				}//for
 				
 				if(minEdge.Node1 != null) {
 					chosenEdges.add(minEdge);
+					unsortedPrimAlgActions++;
 					chosenNodes.add(minEdge.getOtherNode(cur));
+					unsortedPrimAlgActions++;
 				}
 			
 			}
@@ -434,68 +472,68 @@ public class findMinimumSpanningTree {
 	}
 	
 	/*
-	 * This is broke
+	 * Hannas heapedPrimAlg
 	 */
-	LinkedList<Edge> heapedPrimAlg() {
-//		LinkedList<Edge> allEdges = new LinkedList<Edge>();
+	LinkedList<Edge> heapedPrimAlg(Node[] graph) {
 		PriorityQueue<Edge> allEdges = new PriorityQueue<Edge>(new Compare());
 		LinkedList<Node> markedNodes = new LinkedList<Node>();
 		LinkedList<Edge> markedEdges = new LinkedList<Edge>();
 		
-		
-		for(int i = 0; i < nodesGenerated.length; i++) {
-			for(int j = 0; j < nodesGenerated[i].edges.size(); j++) {
-				if(!allEdges.contains(nodesGenerated[i].edges.get(j))) {
-					allEdges.add(nodesGenerated[i].edges.get(j));
+		//Hitta alla kanter i grafen
+		for(int i = 0; i < graph.length; i++) {
+			for(int j = 0; j < graph[i].edges.size(); j++) {
+				if(!allEdges.contains(graph[i].edges.get(j))) {
+					allEdges.add(graph[i].edges.get(j));
 				}
 			}
 		}
 		
-		//glorious debug
-//		System.out.println("Total edges: "+edgesCreated);
-//		System.out.println("But are they equal?: "+allEdges.size());
-//		int i = 0;
-//		while(!allEdges.isEmpty()) {
-//			System.out.println(i+" position in queue has weight "+allEdges.peek().weight);
-//			allEdges.poll();
-//			i++;
-//		}
-		
-		/*
-		 * Teori:
-		 * 
-		 * Ta en kant, markera en av dess noder
-		 * Ta sedan nästa lägsta kant, om EN? av noderna är markerade, markera den andra noden och kanten
-		 * Om ingen av noderna är markerade, spara kanten men 
-		 */
-		
-//		Edge e = allEdges.peek();
-//		System.out.println("Node "+allEdges.peek().Node1.toString()+" and "+allEdges.peek().Node2.toString());
-//		markedNodes.add(e.Node1);
-//		while(!allEdges.isEmpty()) {
-//			e = allEdges.poll();
-//			if(markedNodes.contains(e.Node1) || markedNodes.contains(e.Node2)) {
-//			}
-//			
-//		}
-		
-		
-		Edge e = allEdges.peek();
-		markedNodes.add(e.Node1);
-		
-		while(markedNodes.size() < nodesGenerated.length) {
-		}
-		
-		return markedEdges;
-		
+		//Run Prim's algorithm
+		LinkedList<Edge> allEdgesLst = new LinkedList<Edge>();
+        while(!allEdges.isEmpty()) {
+            allEdgesLst.add(allEdges.poll());
+            heapedPrimAlgActions++;
+        }
+        Edge e = allEdgesLst.remove();
+        heapedPrimAlgActions++;
+        markedNodes.add(e.Node1);
+        heapedPrimAlgActions++;
+        markedNodes.add(e.Node2);
+        heapedPrimAlgActions++;
+        markedEdges.add(e);
+        heapedPrimAlgActions++;
+        while(markedNodes.size() < nodesGenerated.length) {
+            for(int i = 0; i < allEdgesLst.size(); i++) {
+                if (markedNodes.contains(allEdgesLst.get(i).Node1) && !markedNodes.contains(allEdgesLst.get(i).Node2)){
+                    markedNodes.add(allEdgesLst.get(i).Node2);
+                    heapedPrimAlgActions++;
+                    markedEdges.add(allEdgesLst.get(i));
+                    heapedPrimAlgActions++;
+                    allEdgesLst.remove(i);
+                    heapedPrimAlgActions++;
+                    break;
+                }
+                else if (!markedNodes.contains(allEdgesLst.get(i).Node1) && markedNodes.contains(allEdgesLst.get(i).Node2)){
+                    markedNodes.add(allEdgesLst.get(i).Node1);
+                    heapedPrimAlgActions++;
+                    markedEdges.add(allEdgesLst.get(i));
+                    heapedPrimAlgActions++;
+                    allEdgesLst.remove(i);
+                    heapedPrimAlgActions++;
+                    break;
+                }
 
-		
-//		System.out.println("First element connects node "+pList.peek().Node1.toString()+" and "+pList.peek().Node2.toString()+".");
+            }
+        }
+        
+        return markedEdges;
 	}
 	
 	
 	/*
 	 * Skapar ett träd genom att ta bort alla kanter som Prims algoritm inte valde.
+	 * 
+	 * Note: Denna implementation är något klumpig för att undvika ett concurrentModificationException.
 	 */
 	Node[] createNewTree(LinkedList<Edge> eList) {
 		Node[] copyOfOriginal = nodesGenerated.clone();
