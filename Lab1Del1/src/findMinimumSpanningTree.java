@@ -73,7 +73,7 @@ public class findMinimumSpanningTree {
 				this.Node2 = node2;
 				node1.edges.add(this);
 				node2.edges.add(this);
-				this.weight = 1 + r.nextInt(20);
+				this.weight = 1 + r.nextInt(20); //should be 20
 			}
 		}
 		
@@ -136,7 +136,7 @@ public class findMinimumSpanningTree {
 		assignIdentifier assigner = new assignIdentifier();
 		
 		//Antalet noder som ska genereras
-		int totalNodesToMake = 25; //r.nextInt(23);
+		int totalNodesToMake = 2 + r.nextInt(23);
 		
 		//Tilldelar nodesGenerated en array med storlek motsvarande antalet noder som ska skapas
 		nodesGenerated = new Node[totalNodesToMake];
@@ -175,8 +175,8 @@ public class findMinimumSpanningTree {
 	}
 	
 	public findMinimumSpanningTree() {
-		this.r = new Random(2);
-//		this.r = new Random(System.currentTimeMillis());
+//		this.r = new Random(2);
+		this.r = new Random(System.currentTimeMillis());
 	}
 	
 	
@@ -220,6 +220,7 @@ public class findMinimumSpanningTree {
     }
 	
 	/*
+	 * Bellas AdjacencyMatrix
 	 * Skapar en jämn matris för alla noder i grafen
 	 */
     int[][] generateAdjacencyMatrix() {
@@ -365,7 +366,7 @@ public class findMinimumSpanningTree {
 		Node[] copy1 = asdf.nodesGenerated.clone();
 		Node[] copy2 = asdf.nodesGenerated.clone();
 		
-//		=======UNSORTED VERSION=======
+//		======= UNSORTED VERSION =======
 		asdf.nodesGenerated = asdf.createNewTree(asdf.unsortedPrimAlg(copy1));
 		
 		asdf.printAdjacencyMatrix();
@@ -373,6 +374,7 @@ public class findMinimumSpanningTree {
 		asdf.printAdjacencyList();
 		
 		System.out.println("Has cycle?: "+asdf.cyclePresent(asdf.nodesGenerated[0]));
+		System.out.println("Is connected?: "+asdf.isConnected());
 		System.out.println("Unsorted version used "+asdf.unsortedPrimAlgActions+" actions.");
 		System.out.println("The matrix took "+asdf.matrixActions+" actions to generate.");
 		System.out.println("The list took "+asdf.listActions+" actions to generate.");
@@ -449,10 +451,10 @@ public class findMinimumSpanningTree {
 			for(int i = 0; i < chosenNodes.size(); i++) {
 				cur = chosenNodes.get(i);
 				unsortedPrimAlgActions++;
-				minEdge = new Edge();
-				unsortedPrimAlgActions++;
+				minEdge = new Edge(); //reset min value found
 				
 				for(int x = 0; x < cur.edges.size(); x++) {
+					unsortedPrimAlgActions++;
 					if(cur.edges.get(x).weight < minEdge.weight && !chosenNodes.contains(cur.edges.get(x).getOtherNode(cur))) {
 						minEdge = cur.edges.get(x);
 						unsortedPrimAlgActions++;
@@ -492,32 +494,26 @@ public class findMinimumSpanningTree {
 		LinkedList<Edge> allEdgesLst = new LinkedList<Edge>();
         while(!allEdges.isEmpty()) {
             allEdgesLst.add(allEdges.poll());
-            heapedPrimAlgActions++;
         }
         Edge e = allEdgesLst.remove();
         heapedPrimAlgActions++;
         markedNodes.add(e.Node1);
-        heapedPrimAlgActions++;
         markedNodes.add(e.Node2);
-        heapedPrimAlgActions++;
         markedEdges.add(e);
         heapedPrimAlgActions++;
         while(markedNodes.size() < nodesGenerated.length) {
             for(int i = 0; i < allEdgesLst.size(); i++) {
+            	heapedPrimAlgActions++;
                 if (markedNodes.contains(allEdgesLst.get(i).Node1) && !markedNodes.contains(allEdgesLst.get(i).Node2)){
                     markedNodes.add(allEdgesLst.get(i).Node2);
-                    heapedPrimAlgActions++;
                     markedEdges.add(allEdgesLst.get(i));
-                    heapedPrimAlgActions++;
                     allEdgesLst.remove(i);
                     heapedPrimAlgActions++;
                     break;
                 }
                 else if (!markedNodes.contains(allEdgesLst.get(i).Node1) && markedNodes.contains(allEdgesLst.get(i).Node2)){
                     markedNodes.add(allEdgesLst.get(i).Node1);
-                    heapedPrimAlgActions++;
                     markedEdges.add(allEdgesLst.get(i));
-                    heapedPrimAlgActions++;
                     allEdgesLst.remove(i);
                     heapedPrimAlgActions++;
                     break;
