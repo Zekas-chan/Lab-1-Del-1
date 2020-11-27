@@ -19,9 +19,14 @@ public class findMinimumSpanningTree {
 	private Node[] nodesGenerated;
 	public Random r;
 
+	// easy to reach testing levers
+	private boolean useRandomSeed = true;
+	private int nodesToMake = 26; // max 26
+
 	// analysvariabler; ignore
 	int timesRun;
 	int graphTraversed;
+	int maximumRestart = 0;
 
 	// analysis: different prims
 	int heapedPrimAlgActions;
@@ -149,7 +154,7 @@ public class findMinimumSpanningTree {
 		assignIdentifier assigner = new assignIdentifier();
 
 		// Antalet noder som ska genereras
-		int totalNodesToMake = 26; // min 2 max 26
+		int totalNodesToMake = this.nodesToMake;
 
 		// Tilldelar nodesGenerated en array med storlek motsvarande antalet noder som
 		// ska skapas
@@ -189,8 +194,11 @@ public class findMinimumSpanningTree {
 	}
 
 	public findMinimumSpanningTree() {
-//		this.r = new Random(984);
-		this.r = new Random(System.currentTimeMillis());
+		if (this.useRandomSeed) {
+			this.r = new Random(System.currentTimeMillis());
+		} else {
+			this.r = new Random(984);
+		}
 	}
 
 	/*
@@ -363,10 +371,11 @@ public class findMinimumSpanningTree {
 	// ========================================================================
 
 	public static void main(String[] args) {
+
 		findMinimumSpanningTree asdf = new findMinimumSpanningTree();
 
 		asdf.generateGraph();
-
+//
 //		======= ORIGINAL GRAPH =======
 		asdf.printWorseAdjacencyMatrix();
 		asdf.printAdjacencyList();
@@ -374,67 +383,80 @@ public class findMinimumSpanningTree {
 		System.out.println("Is connected?: " + asdf.isConnected());
 		System.out.println("The matrix took " + asdf.matrixActions + " actions to generate.");
 		System.out.println("The list took " + asdf.listActions + " actions to generate.");
-
+//
 		asdf.matrixActions = 0;
 		asdf.listActions = 0;
-
-		System.out.println("Running prim on it!");
+//
+		System.out.println("Running prim on it!\n\n\n");
 
 		// do not remove commented lines below
-		Node[] copy1 = asdf.nodesGenerated.clone();
-		Node[] copy2 = asdf.nodesGenerated.clone();
 
-//		======= UNSORTED VERSION w/ LIST ======= (untested)
-		asdf.nodesGenerated = asdf.createNewTree(asdf.unsortedListPrimAlg(asdf.generateAdjacencyList()));
-
-		asdf.printWorseAdjacencyMatrix();
-
-		asdf.printAdjacencyList();
-
-		System.out.println("Has cycle?: " + asdf.cyclePresent(asdf.nodesGenerated[0]));
-		System.out.println("Is connected?: " + asdf.isConnected());
-		System.out.println("Unsorted version used " + asdf.unsortedPrimAlgActions + " actions.");
-		System.out.println("The matrix took " + asdf.matrixActions + " actions to generate.");
-		System.out.println("The list took " + asdf.listActions + " actions to generate.");
+//		======= UNSORTED VERSION w/ LIST =======
+		asdf.printUnsortedList();
 
 //		======= UNSORTED VERSION w/ MATRIX =======
-//		asdf.nodesGenerated = asdf.createNewTree(asdf.unsortedListPrimAlgMatrix(asdf.generateAdjacencyList()));
-//		
-//		asdf.printWorseAdjacencyMatrix();
-//
-//		asdf.printAdjacencyList();
-//
-//		System.out.println("Has cycle?: " + asdf.cyclePresent(asdf.nodesGenerated[0]));
-//		System.out.println("Is connected?: " + asdf.isConnected());
-//		System.out.println("Unsorted version used " + asdf.unsortedPrimAlgActions + " actions.");
-//		System.out.println("The matrix took " + asdf.matrixActions + " actions to generate.");
-//		System.out.println("The list took " + asdf.listActions + " actions to generate.");
-		
+//		asdf.printUnsortedMatrix();
+
 //		====== HEAPED VERSION w/ LIST ========== 
-//		asdf.createNewTree(asdf.heapedPrimAlgAdjecencyLst());
-//		
-//		asdf.printWorseAdjacencyMatrix();
-//		
-//		asdf.printAdjacencyList();
-//		
-//		System.out.println("Has cycle?: "+asdf.cyclePresent(asdf.nodesGenerated[0]));
-//		System.out.println("Is connected?: "+asdf.isConnected());
-//		System.out.println("Heaped version used "+asdf.heapedPrimAlgActions+" actions.");
-//		System.out.println("The matrix took "+asdf.matrixActions+" actions to generate.");
-//		System.out.println("The list took "+asdf.listActions+" actions to generate.");
+//		asdf.printHeapedList();
 
 //		====== HEAPED VERSION w/ MATRIX ========== 
-//		asdf.createNewTree(asdf.heapedPrimAlgAdjecencyMatrix());
-//		
-//		asdf.printWorseAdjacencyMatrix();
-//		
-//		asdf.printAdjacencyList();
-//		
-//		System.out.println("Has cycle?: "+asdf.cyclePresent(asdf.nodesGenerated[0]));
-//		System.out.println("Is connected?: "+asdf.isConnected());
-//		System.out.println("Heaped version used "+asdf.heapedPrimAlgActions+" actions.");
-//		System.out.println("The matrix took "+asdf.matrixActions+" actions to generate.");
-//		System.out.println("The list took "+asdf.listActions+" actions to generate.");
+//		asdf.printHeapedMatrix();
+	}
+
+	void printUnsortedList() {
+		nodesGenerated = createNewTree(unsortedListPrimAlg(generateAdjacencyList()));
+		int ListActions = this.listActions;
+		// printWorseAdjacencyMatrix();
+
+		printAdjacencyList();
+
+		System.out.println("Has cycle?: " + cyclePresent(nodesGenerated[0]));
+		System.out.println("Is connected?: " + isConnected());
+		System.out.println("Unsorted version used " + unsortedPrimAlgActions + " actions.");
+		System.out.println("The input list took " + ListActions + " actions to generate.");
+	}
+
+	void printUnsortedMatrix() {
+		nodesGenerated = createNewTree(unsortedListPrimAlgMatrix(generateWorseAdjacencyMatrix()));
+		int MatrixActions = this.matrixActions;
+		// printWorseAdjacencyMatrix();
+
+		printAdjacencyList();
+
+		System.out.println("Has cycle?: " + cyclePresent(nodesGenerated[0]));
+		System.out.println("Is connected?: " + isConnected());
+		System.out.println("Unsorted version used " + unsortedPrimAlgActions + " actions.");
+		System.out.println("The input matrix took " + MatrixActions + " actions to generate.");
+//		System.out.println("The list took " + listActions + " actions to generate.");
+	}
+
+	void printHeapedList() {
+		nodesGenerated = createNewTree(heapedPrimAlgAdjecencyLst());
+		int ListActions = this.listActions;
+//		printWorseAdjacencyMatrix();
+
+		printAdjacencyList();
+
+		System.out.println("Has cycle?: " + cyclePresent(nodesGenerated[0]));
+		System.out.println("Is connected?: " + isConnected());
+		System.out.println("Heaped version used " + heapedPrimAlgActions + " actions.");
+//		System.out.println("The matrix took "+matrixActions+" actions to generate.");
+		System.out.println("The input list took " + ListActions + " actions to generate.");
+	}
+
+	void printHeapedMatrix() {
+		nodesGenerated = createNewTree(heapedPrimAlgAdjecencyMatrix());
+		int MatrixActions = this.matrixActions;
+//		printWorseAdjacencyMatrix();
+
+		printAdjacencyList();
+
+		System.out.println("Has cycle?: " + cyclePresent(nodesGenerated[0]));
+		System.out.println("Is connected?: " + isConnected());
+		System.out.println("Heaped version used " + heapedPrimAlgActions + " actions.");
+		System.out.println("The input matrix took " + MatrixActions + " actions to generate.");
+//		System.out.println("The list took "+listActions+" actions to generate.");
 	}
 
 //=================================|Del 2|=========================================================
@@ -516,37 +538,6 @@ public class findMinimumSpanningTree {
 		unsortedPrimAlgActions++;
 		// find the lowest weight edge from this node to an unselected node
 
-		/*
-		 * Below does not exploit graph being represented as an adjacency list at all:
-		 * it is too cumbersome.
-		 * 
-		 * Oldversion below
-		 */
-//		while(chosenNodes.size() < adjList.length) {
-//			for(int i = 0; i < chosenNodes.size(); i++) {
-//				cur = chosenNodes.get(i);
-//				unsortedPrimAlgActions++;
-//				minEdge = new Edge(); //reset min value found
-//				
-//				for(int x = 0; x < cur.edges.size(); x++) {
-//					unsortedPrimAlgActions++;
-//					if(cur.edges.get(x).weight < minEdge.weight && !chosenNodes.contains(cur.edges.get(x).getOtherNode(cur))) {
-//						minEdge = cur.edges.get(x);
-//						unsortedPrimAlgActions++;
-//					}//if
-//				}//for
-//				
-//				if(minEdge.Node1 != null) {
-//					chosenEdges.add(minEdge);
-//					unsortedPrimAlgActions++;
-//					chosenNodes.add(minEdge.getOtherNode(cur));
-//					unsortedPrimAlgActions++;
-//				}
-//			
-//			}
-//		}//while
-		//end oldver
-
 		while (chosenNodes.size() < adjList.length) {
 			for (int i = 0; i < chosenNodes.size(); i++) {
 				cur = chosenNodes.get(i);
@@ -608,6 +599,10 @@ public class findMinimumSpanningTree {
 					unsortedPrimAlgActions++;
 					if (cur == adjMatrix[x][0]) {
 						for (int y = 1; y < adjMatrix[x].length; y++) {
+							if (adjMatrix[x][y] == null) {
+								unsortedPrimAlgActions++;
+								continue;
+							}
 							if (adjMatrix[x][y].getEdge(cur).weight < minEdge.weight
 									&& !chosenNodes.contains(adjMatrix[x][y].getEdge(cur).getOtherNode(cur))) {
 								minEdge = adjMatrix[x][y].getEdge(cur);
@@ -650,13 +645,15 @@ public class findMinimumSpanningTree {
 				if (curNode == adjecencyLst[i][0]) {
 					for (int j = 1; j < adjecencyLst[i].length; j++) {
 						Edge e = curNode.getEdge(adjecencyLst[i][j]);
-						edges.add(e);
+						if (!edges.contains(e)) {
+							edges.add(e);
+						}
 						heapedPrimAlgActions++;
 					}
 					break;
 				}
 			}
-			
+
 			while (!edges.isEmpty()) {
 				Edge e = edges.poll();
 				heapedPrimAlgActions++;
@@ -676,10 +673,11 @@ public class findMinimumSpanningTree {
 					break;
 				}
 			}
-			if (edges.isEmpty()){
-				if(restart == 0) {
-					restart = markedNodes.size()-1;
-				}else {
+			if (edges.isEmpty()) {
+				this.maximumRestart++; // analysis/debug
+				if (restart == 0) {
+					restart = markedNodes.size() - 1;
+				} else {
 					restart--;
 				}
 				heapedPrimAlgActions++;
@@ -693,7 +691,7 @@ public class findMinimumSpanningTree {
 	/*
 	 * heaped prim algorithm w/ matrix
 	 */
-	
+
 	LinkedList<Edge> heapedPrimAlgAdjecencyMatrix() {
 		PriorityQueue<Edge> edges = new PriorityQueue<Edge>(new Compare());
 		LinkedList<Node> markedNodes = new LinkedList<Node>();
@@ -701,8 +699,7 @@ public class findMinimumSpanningTree {
 		Node[][] adjecencyMatrix = generateWorseAdjacencyMatrix();
 		Node curNode = nodesGenerated[r.nextInt(nodesGenerated.length)];
 		int restart = 0;
-		
-		
+
 		heapedPrimAlgActions++;
 		markedNodes.add(curNode);
 		heapedPrimAlgActions++;
@@ -712,7 +709,7 @@ public class findMinimumSpanningTree {
 				heapedPrimAlgActions++;
 				if (curNode == adjecencyMatrix[i][0]) {
 					for (int j = 1; j < adjecencyMatrix[i].length; j++) {
-						if(adjecencyMatrix[i][j] == null) {
+						if (adjecencyMatrix[i][j] == null) {
 							heapedPrimAlgActions++;
 							continue;
 						}
@@ -742,10 +739,10 @@ public class findMinimumSpanningTree {
 					break;
 				}
 			}
-			if (edges.isEmpty()){
-				if(restart == 0) {
-					restart = markedNodes.size()-1;
-				}else {
+			if (edges.isEmpty()) {
+				if (restart == 0) {
+					restart = markedNodes.size() - 1;
+				} else {
 					restart--;
 				}
 				heapedPrimAlgActions++;
