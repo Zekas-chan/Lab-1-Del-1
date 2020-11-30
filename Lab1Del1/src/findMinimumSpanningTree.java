@@ -21,7 +21,7 @@ public class findMinimumSpanningTree {
 
 	// easy to reach testing levers
 	private boolean useRandomSeed = true;
-	private int nodesToMake = 26; // max 26
+	private int nodesToMake = 500; // max 26
 
 	// analysvariabler; ignore
 	int timesRun;
@@ -133,6 +133,7 @@ public class findMinimumSpanningTree {
 	 */
 	private class assignIdentifier {
 		private int n;
+		private int x;
 		private String[] letters = { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p",
 				"q", "r", "s", "t", "u", "v", "w", "x", "y", "z" };
 
@@ -141,8 +142,16 @@ public class findMinimumSpanningTree {
 		}
 
 		String getIdentifier() {
-			n++;
-			return letters[n];
+			String identity = "";
+			if(n > 24) {
+				n = 0;
+				x++;
+			}else {
+				n++;
+			}
+			identity += letters[n]+x;
+			
+			return identity;
 		}
 	}
 
@@ -150,6 +159,7 @@ public class findMinimumSpanningTree {
 	 * Genererar en graf.
 	 */
 	public void generateGraph() {
+		System.out.println("Generating graph...");
 		// Skapar en intern klass som tilldelar identifierare
 		assignIdentifier assigner = new assignIdentifier();
 
@@ -243,7 +253,6 @@ public class findMinimumSpanningTree {
 	 */
 	Node[][] generateWorseAdjacencyMatrix() {
 		Node[][] matrix = new Node[nodesGenerated.length][nodesGenerated.length + 1];
-		String letterTest = "abcdefghijklmnopqrstuvwxyz";
 		int pos;
 
 		for (int i = 0; i < nodesGenerated.length; i++) {
@@ -251,7 +260,7 @@ public class findMinimumSpanningTree {
 			matrixActions++;
 			for (int x = 0; x < nodesGenerated[i].edges.size(); x++) {
 				matrixActions++;
-				pos = letterTest.indexOf(nodesGenerated[i].edges.get(x).getOtherNode(nodesGenerated[i]).toString());
+				pos = getPos(nodesGenerated[i].edges.get(x).getOtherNode(nodesGenerated[i]).toString());
 				matrixActions++;
 				matrix[i][pos + 1] = nodesGenerated[i].edges.get(x).getOtherNode(nodesGenerated[i]);
 				matrixActions++;
@@ -259,6 +268,14 @@ public class findMinimumSpanningTree {
 		}
 		matrixActions++;
 		return matrix;
+	}
+	
+	int getPos(String ident) {
+		String letterTest = "abcdefghijklmnopqrstuvwxyz";
+		int p1 = letterTest.indexOf(ident.substring(0, 0));
+		int p2 = Integer.parseInt(ident.substring(1));
+		return p1 + 26 * p2;
+		
 	}
 
 	/*
@@ -336,6 +353,11 @@ public class findMinimumSpanningTree {
 		Node[][] matrix = generateWorseAdjacencyMatrix();
 		String alphabet = "abcdefghijklmnopqrstuvwxyz";
 		String stringmatrix = "|   |";
+		
+		if(nodesGenerated.length > 50) {
+			System.out.println("The generated matrix was too large to display.");
+			return;
+		}
 
 		// begin
 		System.out.println("Adjacency Matrix: ");
@@ -357,6 +379,10 @@ public class findMinimumSpanningTree {
 	}
 
 	private void printAdjacencyList() {
+		if(nodesGenerated.length > 50) {
+			System.out.println("The generated adjacency list was too large to display.");
+			return;
+		}
 		Node[][] aList = generateAdjacencyList();
 		System.out.println("Graph adjacency list: ");
 		for (int i = 0; i < aList.length; i++) {
@@ -498,7 +524,7 @@ public class findMinimumSpanningTree {
 	 */
 	Node[] createNewTree(LinkedList<Edge> eList) {
 		Node[] copyOfOriginal = nodesGenerated.clone();
-		Edge[] killList = new Edge[500];
+		Edge[] killList = new Edge[nodesGenerated.length*nodesGenerated.length];
 
 		int asdf = -1;
 		for (Node n : copyOfOriginal) {
