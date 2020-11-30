@@ -1,3 +1,4 @@
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.PriorityQueue;
@@ -20,11 +21,21 @@ public class findMinimumSpanningTree {
 	public Random r;
 
 	// easy to reach testing levers
-	private boolean useRandomSeed = true;
-	private int nodesToMake = 500; // max 26
+	private static int mode = 0;
+	/*
+	 * Mode 0 = invalid
+	 * Mode 1 = unsortedListPrimAlg
+	 * Mode 2 = unsortedListPrimAlgMatrix
+	 * Mode 3 = heapedPrimAlgAdjecencyLst
+	 * Mode 4 = heapedPrimAlgAdjecencyMatrix
+	 */
+	private boolean useRandomSeed = false;
+	private int seedToUse = 984;
+	private int nodesToMake = 10000;
 
 	// analysvariabler; ignore
 	int timesRun;
+	int graphAttempts;
 	int graphTraversed;
 	int maximumRestart = 0;
 
@@ -158,37 +169,60 @@ public class findMinimumSpanningTree {
 	/*
 	 * Genererar en graf.
 	 */
-	public void generateGraph() {
-		System.out.println("Generating graph...");
+	public void generateGraph(int nodesToMake) {
+//		System.out.println("Generating graph...");
 		// Skapar en intern klass som tilldelar identifierare
 		assignIdentifier assigner = new assignIdentifier();
 
 		// Antalet noder som ska genereras
-		int totalNodesToMake = this.nodesToMake;
+//		int totalNodesToMake = this.nodesToMake;
 
 		// Tilldelar nodesGenerated en array med storlek motsvarande antalet noder som
 		// ska skapas
-		nodesGenerated = new Node[totalNodesToMake];
+		nodesGenerated = new Node[nodesToMake];
 
 		// Fyller arrayen med noder
-		for (int i = 0; i < totalNodesToMake; i++) {
-			nodesGenerated[i] = new Node(assigner.getIdentifier(), totalNodesToMake);
+		for (int i = 0; i < nodesToMake; i++) {
+			nodesGenerated[i] = new Node(assigner.getIdentifier(), nodesToMake);
 		}
+		
+		LinkedList<Node> selection = new LinkedList<Node>();
+		
+		Collections.addAll(selection, nodesGenerated);
 
 		// Tilldelar kanter till noderna tills dess att alla noder kan nås från en nod
-		while (!isConnected()) {
-			Node node1;
-			Node node2;
+		Node node1;
+		Node node2;
+		int count = 0;
+		while (true) {
+			count++;
 			while (true) {
-				node1 = nodesGenerated[r.nextInt(nodesGenerated.length)];
-				node2 = nodesGenerated[r.nextInt(nodesGenerated.length)];
+				graphAttempts++;
+				node1 = selection.get(r.nextInt(selection.size()));
+				node2 = selection.get(r.nextInt(selection.size()));
 				if (node1.toString() != node2.toString() && edgeNotAlreadyPresent(node1, node2)) {
 					break;
 				}
 			}
 			Edge e = new Edge(node1, node2);
+			if(node1.edges.size() == nodesToMake) {
+				selection.remove(node1);
+			}else if(node2.edges.size() == nodesToMake) {
+				selection.remove(node2);
+			}
+			
+			if(count > nodesGenerated.length / 10) {
+				if(isConnected()) {
+					break;
+				}else {
+					count = 0;
+				}
+			}
 
 		}
+//		System.out.println("isConnected spammed: "+timesRun);
+//		System.out.println("Node connection attempts spammed: "+graphAttempts);
+//		System.out.println("Done!");
 	}
 
 	/*
@@ -207,7 +241,7 @@ public class findMinimumSpanningTree {
 		if (this.useRandomSeed) {
 			this.r = new Random(System.currentTimeMillis());
 		} else {
-			this.r = new Random(984);
+			this.r = new Random(this.seedToUse);
 		}
 	}
 
@@ -215,16 +249,17 @@ public class findMinimumSpanningTree {
 	 * Hannas isConnected. Avgör om grafen är sammanhängande.
 	 */
 	boolean isConnected() {
+		timesRun++;
 		LinkedList<Node> markedNodes = new LinkedList<Node>();
 		LinkedList<Node> Q = new LinkedList<Node>();
 		Q.add(nodesGenerated[0]);
 		while (!Q.isEmpty()) {
 			Node u = Q.pop();
-			if (!isInLst(u, markedNodes)) {
+			if (!markedNodes.contains(u)) {
 				markedNodes.add(u);
 				for (int i = 0; i < u.edges.size(); i++) {
 					Node nodeToAdd = u.edges.get(i).Node1 == u ? u.edges.get(i).Node2 : u.edges.get(i).Node1;
-					if (!isInLst(nodeToAdd, markedNodes)) {
+					if (!markedNodes.contains(nodeToAdd)) {
 						Q.add(nodeToAdd);
 					}
 				}
@@ -239,14 +274,14 @@ public class findMinimumSpanningTree {
 		return false;
 	}
 
-	boolean isInLst(Node node, LinkedList<Node> nodeLst) {
-		for (int i = 0; i < nodeLst.size(); i++) {
-			if (node == nodeLst.get(i)) {
-				return true;
-			}
-		}
-		return false;
-	}
+//	boolean isInLst(Node node, LinkedList<Node> nodeLst) {
+//		for (int i = 0; i < nodeLst.size(); i++) {
+//			if (node == nodeLst.get(i)) {
+//				return true;
+//			}
+//		}
+//		return false;
+//	}
 
 	/*
 	 * Philips bastardiserade version av Bellas AdjacencyMatrix
@@ -398,36 +433,162 @@ public class findMinimumSpanningTree {
 
 	public static void main(String[] args) {
 
-		findMinimumSpanningTree asdf = new findMinimumSpanningTree();
-
-		asdf.generateGraph();
+//		findMinimumSpanningTree asdf = new findMinimumSpanningTree();
+//
+//		asdf.generateGraph();
 //
 //		======= ORIGINAL GRAPH =======
-		asdf.printWorseAdjacencyMatrix();
-		asdf.printAdjacencyList();
-		System.out.println("Has cycle?: " + asdf.cyclePresent(asdf.nodesGenerated[0]));
-		System.out.println("Is connected?: " + asdf.isConnected());
-		System.out.println("The matrix took " + asdf.matrixActions + " actions to generate.");
-		System.out.println("The list took " + asdf.listActions + " actions to generate.");
+//		asdf.printWorseAdjacencyMatrix();
+//		asdf.printAdjacencyList();
+//		System.out.println("Has cycle?: " + asdf.cyclePresent(asdf.nodesGenerated[0]));
+//		System.out.println("Is connected?: " + asdf.isConnected());
+//		System.out.println("The matrix took " + asdf.matrixActions + " actions to generate.");
+//		System.out.println("The list took " + asdf.listActions + " actions to generate.");
 //
-		asdf.matrixActions = 0;
-		asdf.listActions = 0;
-//
-		System.out.println("Running prim on it!\n\n\n");
+//		asdf.matrixActions = 0;
+//		asdf.listActions = 0;
 
-		// do not remove commented lines below
-
-//		======= UNSORTED VERSION w/ LIST =======
-		asdf.printUnsortedList();
-
-//		======= UNSORTED VERSION w/ MATRIX =======
-//		asdf.printUnsortedMatrix();
-
-//		====== HEAPED VERSION w/ LIST ========== 
-//		asdf.printHeapedList();
-
+		
+		switch(mode) {
+		
+		case 1:
+//			======= UNSORTED VERSION w/ LIST =======
+			System.out.println("Running Unsorted list.\n Input: Adjacency List. \n Nodes: 2000");
+			findMinimumSpanningTree listlist2k = new findMinimumSpanningTree();
+			listlist2k.generateGraph(2000);
+			listlist2k.printUnsortedList();
+			System.out.print("\n");
+			
+			System.out.println("Running Unsorted list.\n Input: Adjacency List. \n Nodes: 4000");
+			findMinimumSpanningTree listlist4k = new findMinimumSpanningTree();
+			listlist4k.generateGraph(4000);
+			listlist4k.printUnsortedList();
+			System.out.print("\n");
+			
+			System.out.println("Running Unsorted list.\n Input: Adjacency List. \n Nodes: 6000");
+			findMinimumSpanningTree listlist6k = new findMinimumSpanningTree();
+			listlist6k.generateGraph(6000);
+			listlist6k.printUnsortedList();
+			System.out.print("\n");
+			
+			System.out.println("Running Unsorted list.\n Input: Adjacency List. \n Nodes: 8000");
+			findMinimumSpanningTree listlist8k = new findMinimumSpanningTree();
+			listlist8k.generateGraph(8000);
+			listlist8k.printUnsortedList();
+			System.out.print("\n");
+			
+			System.out.println("Running Unsorted list.\n Input: Adjacency List. \n Nodes: 10000");
+			findMinimumSpanningTree listlist10k = new findMinimumSpanningTree();
+			listlist10k.generateGraph(10000);
+			listlist10k.printUnsortedList();
+			System.out.print("\n");
+		
+			break;
+			
+		case 2:
+//			======= UNSORTED VERSION w/ MATRIX =======
+			System.out.println("Running Unsorted list.\n Input: Adjacency Matrix.\n Nodes: 2000");
+			findMinimumSpanningTree listMatrix2k = new findMinimumSpanningTree();
+			listMatrix2k.generateGraph(2000);
+			listMatrix2k.printUnsortedMatrix();
+			System.out.print("\n");
+			
+			System.out.println("Running Unsorted list.\n Input: Adjacency Matrix.\n Nodes: 4000");
+			findMinimumSpanningTree listMatrix4k = new findMinimumSpanningTree();
+			listMatrix4k.generateGraph(4000);
+			listMatrix4k.printUnsortedMatrix();
+			System.out.print("\n");
+			
+			System.out.println("Running Unsorted list.\n Input: Adjacency Matrix.\n Nodes: 6000");
+			findMinimumSpanningTree listMatrix6k = new findMinimumSpanningTree();
+			listMatrix6k.generateGraph(6000);
+			listMatrix6k.printUnsortedMatrix();
+			System.out.print("\n");
+			
+			System.out.println("Running Unsorted list.\n Input: Adjacency Matrix.\n Nodes: 8000");
+			findMinimumSpanningTree listMatrix8k = new findMinimumSpanningTree();
+			listMatrix8k.generateGraph(8000);
+			listMatrix8k.printUnsortedMatrix();
+			System.out.print("\n");
+			
+			System.out.println("Running Unsorted list.\n Input: Adjacency Matrix.\n Nodes: 10000");
+			findMinimumSpanningTree listMatrix10k = new findMinimumSpanningTree();
+			listMatrix10k.generateGraph(10000);
+			listMatrix10k.printUnsortedMatrix();
+			System.out.print("\n");
+			break;
+			
+		case 3:
+//			====== HEAPED VERSION w/ LIST ========== 
+			System.out.println("Running min-heap Prim.\n Input: Adjacency List.\n Nodes: 2000");
+			findMinimumSpanningTree heapList2k = new findMinimumSpanningTree();
+			heapList2k.generateGraph(2000);
+			heapList2k.printHeapedList();
+			System.out.print("\n");
+			
+			System.out.println("Running min-heap Prim.\n Input: Adjacency List.\n Nodes: 4000");
+			findMinimumSpanningTree heapList4k = new findMinimumSpanningTree();
+			heapList4k.generateGraph(4000);
+			heapList4k.printHeapedList();
+			System.out.print("\n");
+			
+			System.out.println("Running min-heap Prim.\n Input: Adjacency List.\n Nodes: 6000");
+			findMinimumSpanningTree heapList6k = new findMinimumSpanningTree();
+			heapList6k.generateGraph(6000);
+			heapList6k.printHeapedList();
+			System.out.print("\n");
+			
+			System.out.println("Running min-heap Prim.\n Input: Adjacency List.\n Nodes: 8000");
+			findMinimumSpanningTree heapList8k = new findMinimumSpanningTree();
+			heapList8k.generateGraph(8000);
+			heapList8k.printHeapedList();
+			System.out.print("\n");
+			
+			System.out.println("Running min-heap Prim.\n Input: Adjacency List.\n Nodes: 10000");
+			findMinimumSpanningTree heapList10k = new findMinimumSpanningTree();
+			heapList10k.generateGraph(10000);
+			heapList10k.printHeapedList();
+			System.out.print("\n");
+			break;
+			
+		case 4:
 //		====== HEAPED VERSION w/ MATRIX ========== 
-//		asdf.printHeapedMatrix();
+			System.out.println("Running min-heap Prim.\n Input: Adjacency Matrix.\n Nodes: 2000");
+			findMinimumSpanningTree heapMatrix2k = new findMinimumSpanningTree();
+			heapMatrix2k.generateGraph(2000);
+			heapMatrix2k.printHeapedMatrix();
+			System.out.print("\n");
+			
+			System.out.println("Running min-heap Prim.\n Input: Adjacency Matrix.\n Nodes: 4000");
+			findMinimumSpanningTree heapMatrix4k = new findMinimumSpanningTree();
+			heapMatrix4k.generateGraph(4000);
+			heapMatrix4k.printHeapedMatrix();
+			System.out.print("\n");
+			
+			System.out.println("Running min-heap Prim.\n Input: Adjacency Matrix.\n Nodes: 6000");
+			findMinimumSpanningTree heapMatrix6k = new findMinimumSpanningTree();
+			heapMatrix6k.generateGraph(6000);
+			heapMatrix6k.printHeapedMatrix();
+			System.out.print("\n");
+			
+			System.out.println("Running min-heap Prim.\n Input: Adjacency Matrix.\n Nodes: 8000");
+			findMinimumSpanningTree heapMatrix8k = new findMinimumSpanningTree();
+			heapMatrix8k.generateGraph(8000);
+			heapMatrix8k.printHeapedMatrix();
+			System.out.print("\n");
+			
+			System.out.println("Running min-heap Prim.\n Input: Adjacency Matrix.\n Nodes: 10000");
+			findMinimumSpanningTree heapMatrix10k = new findMinimumSpanningTree();
+			heapMatrix10k.generateGraph(10000);
+			heapMatrix10k.printHeapedMatrix();
+			System.out.print("\n");
+			
+			break;
+			
+		default:
+			System.out.println("Invalid mode selected");
+			break;
+		}
 	}
 
 	void printUnsortedList() {
@@ -574,10 +735,11 @@ public class findMinimumSpanningTree {
 					unsortedPrimAlgActions++;
 					if (cur == adjList[x][0]) {
 						for (int y = 1; y < adjList[x].length; y++) {
+							unsortedPrimAlgActions++;
 							if (adjList[x][y].getEdge(cur).weight < minEdge.weight
 									&& !chosenNodes.contains(adjList[x][y].getEdge(cur).getOtherNode(cur))) {
 								minEdge = adjList[x][y].getEdge(cur);
-								unsortedPrimAlgActions++;
+								
 
 							}
 						}
@@ -629,10 +791,11 @@ public class findMinimumSpanningTree {
 								unsortedPrimAlgActions++;
 								continue;
 							}
+							unsortedPrimAlgActions++;
 							if (adjMatrix[x][y].getEdge(cur).weight < minEdge.weight
 									&& !chosenNodes.contains(adjMatrix[x][y].getEdge(cur).getOtherNode(cur))) {
 								minEdge = adjMatrix[x][y].getEdge(cur);
-								unsortedPrimAlgActions++;
+								
 
 							}
 						}
